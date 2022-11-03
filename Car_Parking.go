@@ -19,8 +19,7 @@ func main(){
 	Router.HandleFunc("/slot/{_id}", CarParking.UpdateParkingSlot).Methods("PUT")
 	Router.HandleFunc("/slot", CarParking.GetFreeParkingSlots).Methods("GET")
 	Router.HandleFunc("/cartoslot/{user_id}/{car_id}/{slot_id}", CarParking.AddNewCarToSlot).Methods("PUT")
-
-
+	Router.HandleFunc("/cartoslot/{slot_id}",CarParking.DeleteCarFromSlot).Methods("GET")
 
 	http.ListenAndServe(":8080", Router)
 }
