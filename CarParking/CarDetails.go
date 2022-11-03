@@ -74,10 +74,10 @@ func UpdateCarDetails(writer http.ResponseWriter, req *http.Request){
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
 	filter := bson.M{"_id": pid}
-	// update := bson.M{"$set": bson.M{"carnumber": car.CarNumber, "carmodel": car.CarModel}}
-	update:=bson.D{{"$set",bson.D{{"carnumber", car.CarNumber}, {"carmodel", car.CarModel}}},}
+	update := bson.M{"$set": bson.M{"carnumber": car.CarNumber, "carmodel": car.CarModel}}
 
-	 result,err := collection.UpdateMany(context.TODO(), filter, update)
+	result,err := collection.UpdateMany(context.TODO(), filter, update)
+	fmt.Println(result, err)
 	if result!=nil{
 		fmt.Println("Data Updated Succesfully")
 	}

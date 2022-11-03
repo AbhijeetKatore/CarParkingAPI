@@ -14,6 +14,13 @@ func main(){
 	Router.HandleFunc("/car", CarParking.AddCarDetails).Methods("POST")
 	Router.HandleFunc("/car/{_id}", CarParking.DeleteCarDetails).Methods("DELETE")
 	Router.HandleFunc("/car/{_id}", CarParking.UpdateCarDetails).Methods("PUT")
+	Router.HandleFunc("/slot", CarParking.AddParkingSlot).Methods("POST")
+	Router.HandleFunc("/slot/{_id}", CarParking.DeleteParkingSlots).Methods("DELETE")
+	Router.HandleFunc("/slot/{_id}", CarParking.UpdateParkingSlot).Methods("PUT")
+	Router.HandleFunc("/slot", CarParking.GetFreeParkingSlots).Methods("GET")
+	Router.HandleFunc("/cartoslot/{user_id}/{car_id}/{slot_id}", CarParking.AddNewCarToSlot).Methods("PUT")
+
+
 
 	http.ListenAndServe(":8080", Router)
 }
