@@ -18,6 +18,7 @@ type UserDetails struct{
 	FName string
 	LName string
 	Age int
+	UserID int
 }
 
 
@@ -25,21 +26,22 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 	var user UserDetails
 	decoder := json.NewDecoder(res.Body)
 	err := decoder.Decode(&user)
-	
 	if err !=nil{
 		fmt.Println(err)
 	}
-
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("Users")
+	count,_:=collection.CountDocuments(context.TODO(),bson.D{})
+	user.UserID=int(count)+1
 	result,err := collection.InsertOne(context.TODO(), user)
-
 	if err != nil {
 		panic(err)
 	}
 	if result!= nil{
 			fmt.Printf("User Details Inserted Successfully")
 	}
+	CreateIndex(client,"Users","userid")
+
 }
 
 func GetUser(writer http.ResponseWriter, res *http.Request) {
@@ -80,4 +82,6 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 	}else{
 		fmt.Printf("User Details Deleted Succesfully")
 	}
+	CreateIndex(client,"Users","userid")
+
 }

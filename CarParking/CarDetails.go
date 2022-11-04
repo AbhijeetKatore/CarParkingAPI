@@ -34,6 +34,8 @@ func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
 	if result!= nil{
 			fmt.Printf("Car Details Inserted Successfully")
 	}
+	CreateIndex(client,"CarDetails","carnumber")
+
 
 }
 
@@ -55,6 +57,8 @@ func DeleteCarDetails(writer http.ResponseWriter, req *http.Request){
 	}else{
 		fmt.Printf("Car Details Deleted Succesfully")
 	}
+	CreateIndex(client,"CarDetails","carnumber")
+
 }
 
 func UpdateCarDetails(writer http.ResponseWriter, req *http.Request){
@@ -66,19 +70,18 @@ func UpdateCarDetails(writer http.ResponseWriter, req *http.Request){
 	_id := params["_id"]
 	pid, _ := primitive.ObjectIDFromHex(_id)
 
-	
 	if err!=nil{
 		fmt.Println(err)
 	}
-
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
 	filter := bson.M{"_id": pid}
 	update := bson.M{"$set": bson.M{"carnumber": car.CarNumber, "carmodel": car.CarModel}}
-
 	result,err := collection.UpdateMany(context.TODO(), filter, update)
+
 	fmt.Println(result, err)
 	if result!=nil{
 		fmt.Println("Data Updated Succesfully")
 	}
+	CreateIndex(client,"CarDetails","carnumber")
 }

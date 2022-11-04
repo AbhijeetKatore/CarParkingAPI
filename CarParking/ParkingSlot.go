@@ -65,9 +65,6 @@ func UpdateParkingSlot(writer http.ResponseWriter, req *http.Request){
 	params := mux.Vars(req)
 	_id := params["_id"]
 	pid, _ := primitive.ObjectIDFromHex(_id)
-	fmt.Println(_id)
-
-	
 	if err!=nil{
 		fmt.Println(err)
 	}

@@ -28,6 +28,7 @@ func AddNewCarToSlot(writer http.ResponseWriter, req *http.Request) {
 	user,userFound := GetUserFromID(user_idobj)
 	car,carFound := GetCarFromID(car_idobj)
 	slotFound := GetSlotFromID(slot_idobj)
+	
 	if (userFound && carFound && slotFound){
 		client := ConnectDatabase()
 		collection := client.Database("CarParking").Collection("ParkingSlots")

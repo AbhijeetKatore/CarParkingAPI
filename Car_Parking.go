@@ -6,7 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 )
+var errConnection error
 func main(){
+	 Connection()
+}
+
+func Connection()error{
 	Router := mux.NewRouter()
 	Router.HandleFunc("/user", CarParking.AddUser).Methods("POST")
 	Router.HandleFunc("/user", CarParking.GetUser).Methods("GET")
@@ -21,5 +26,6 @@ func main(){
 	Router.HandleFunc("/cartoslot/{user_id}/{car_id}/{slot_id}", CarParking.AddNewCarToSlot).Methods("PUT")
 	Router.HandleFunc("/cartoslot/{slot_id}",CarParking.DeleteCarFromSlot).Methods("GET")
 
-	http.ListenAndServe(":8080", Router)
+	errConnection:=http.ListenAndServe(":8080", Router)
+	return errConnection
 }
