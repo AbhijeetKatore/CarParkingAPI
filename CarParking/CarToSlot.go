@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -18,22 +18,19 @@ func AddNewCarToSlot(writer http.ResponseWriter, req *http.Request) {
 	var car CarDetails
 	params:=mux.Vars(req)
 
-	user_id := params["user_id"]
-	car_id := params["car_id"]
-	slot_id :=params["slot_id"]
-	user_idobj, _ := primitive.ObjectIDFromHex(user_id)
-	car_idobj, _ := primitive.ObjectIDFromHex(car_id)	
-	slot_idobj, _ := primitive.ObjectIDFromHex(slot_id)
+	user_id,_ :=strconv.Atoi( params["_userid"])
+	carnumber := params["carnumber"]
+	uniqueslotid,_ :=strconv.Atoi( params["_uniqueslotid"])
 
-	user,userFound := GetUserFromID(user_idobj)
-	car,carFound := GetCarFromID(car_idobj)
-	slotFound := GetSlotFromID(slot_idobj)
+	user,userFound := GetUserFromID(user_id)
+	car,carFound := GetCarFromID(carnumber)
+	slotFound := GetSlotFromID(uniqueslotid)
 	
 	if (userFound && carFound && slotFound){
 		client := ConnectDatabase()
 		collection := client.Database("CarParking").Collection("ParkingSlots")
-		filter := bson.M{"_id":slot_idobj}
-		update := bson.M{"$set": bson.M{"occupancy":true,"carnumber":car.CarNumber,"fname":user.FName,"lname":user.LName ,"timein":time.Now()}}
+		filter := bson.M{"uniqueslotid":uniqueslotid}
+		update := bson.M{"$set": bson.M{"occupancy":true,"carnumber":car.CarNumber,"fname":user.FName,"lname":user.LName,"user_id":user.UserID ,"timein":time.Now()}}
 		err := collection.FindOneAndUpdate(context.TODO(), filter, update)
 		if err.Err()==mongo.ErrNoDocuments{
 			fmt.Println("Slot Details not Found in Existing Database")
@@ -43,13 +40,13 @@ func AddNewCarToSlot(writer http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func GetUserFromID(user_idobj primitive.ObjectID) (UserDetails,bool){
+func GetUserFromID(user_id int) (UserDetails,bool){
 	var user UserDetails
 	found :=false 
 
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("Users")
-	cursor := collection.FindOne(context.TODO(), bson.M{"_id":user_idobj})
+	cursor := collection.FindOne(context.TODO(), bson.M{"userid":user_id})
 	cursor.Decode(&user)
 	if cursor.Err() == mongo.ErrNoDocuments {
 		fmt.Println("Users Name Not Found in Existing Database please add User Details First or Enter a Correct One")
@@ -59,13 +56,12 @@ func GetUserFromID(user_idobj primitive.ObjectID) (UserDetails,bool){
 	return user, found
 }
 
-func GetCarFromID(car_idobj primitive.ObjectID) (CarDetails,bool){
+func GetCarFromID(carnumber string) (CarDetails,bool){
 	var car CarDetails
 	found :=false 
-
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
-	cursor:= collection.FindOne(context.TODO(), bson.M{"_id":car_idobj})
+	cursor:= collection.FindOne(context.TODO(), bson.M{"carnumber":carnumber})
 	cursor.Decode(&car)
 	if cursor.Err() == mongo.ErrNoDocuments {
 		fmt.Println("Car Number Not Found in Existing Database please add Car Details First or Enter a Correct One")
@@ -75,12 +71,12 @@ func GetCarFromID(car_idobj primitive.ObjectID) (CarDetails,bool){
 	return car,found
 }
 
-func GetSlotFromID(slot_idobj primitive.ObjectID) (bool){
+func GetSlotFromID(uniqueslotid int) (bool){
 	var slot SlotDetails
 	found :=false
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
-	cursor:= collection.FindOne(context.TODO(), bson.M{"_id":slot_idobj})
+	cursor:= collection.FindOne(context.TODO(), bson.M{"uniqueslotid":uniqueslotid})
 	cursor.Decode(&slot)
 	if cursor.Err() == mongo.ErrNoDocuments {
 		fmt.Println("Slot Details Not Found in Existing Database please add New Slot Details First or Enter a Correct One")
@@ -92,11 +88,12 @@ func GetSlotFromID(slot_idobj primitive.ObjectID) (bool){
 
 func DeleteCarFromSlot(writer http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	slot_id := params["slot_id"]
-	slot_idobj, _ := primitive.ObjectIDFromHex(slot_id)
+	// slot_id := params["_uniqueslotid"]
+	uniqueslotid,err := strconv.Atoi(params["_uniqueslotid"])
+
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
-	filter:=bson.D{{"_id",slot_idobj}}
+	filter:=bson.D{{"uniqueslotid",uniqueslotid}}
 	result,err:=collection.DeleteMany(context.TODO(),filter)
 	if err != nil {
     	log.Fatal(err)

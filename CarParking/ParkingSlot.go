@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SlotDetails struct {
 	FloorNumber      int
 	UniqueSlotNumber int
 	Occupancy bool
+	UniqueSlotID int
 }
 
 func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {
@@ -29,6 +30,8 @@ func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {
 
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
+	count,_:=collection.CountDocuments(context.TODO(),bson.D{})
+	slot.UniqueSlotID=int(count)+1
 	result, err := collection.InsertOne(context.TODO(), slot)
 
 	if err != nil {
@@ -36,17 +39,18 @@ func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	}
 	if result != nil {
 		fmt.Printf("Slot Details Inserted Successfully")
+		CreateIndex(client,"ParkingSlots","uniqueslotid")
+
 	}
+
 }
 
 func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request){
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
 	params := mux.Vars(req)
-	_id := params["_id"]
-	pid, _ := primitive.ObjectIDFromHex(_id)
-
-	filter := bson.M{"_id": pid}
+	uniqueslotid,err := strconv.Atoi(params["_uniqueslotid"])
+	filter := bson.M{"uniqueslotid": uniqueslotid}
 	result, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
     	log.Fatal(err)
@@ -55,28 +59,29 @@ func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request){
 		fmt.Println("Data didn't Match to Delete")
 	}else{
 		fmt.Printf("Slot Details Deleted Succesfully")
+		CreateIndex(client,"ParkingSlots","uniqueslotid")
+
 	}
 }
 func UpdateParkingSlot(writer http.ResponseWriter, req *http.Request){
 	var slot SlotDetails
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&slot)
-	
-	params := mux.Vars(req)
-	_id := params["_id"]
-	pid, _ := primitive.ObjectIDFromHex(_id)
 	if err!=nil{
 		fmt.Println(err)
 	}
-
+	params := mux.Vars(req)
+	uniqueslotid,err := strconv.Atoi(params["_uniqueslotid"])
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
-	filter := bson.M{"_id": pid}
+	filter := bson.M{"uniqueslotid": uniqueslotid}
 	update := bson.M{"$set": bson.M{"floornumber": slot.FloorNumber, "uniqueslotnumber": slot.UniqueSlotNumber,"occupancy":slot.Occupancy}}
 
 	result,err := collection.UpdateMany(context.TODO(), filter, update)
 	if result!=nil{
 		fmt.Println("Slot Details Updated Succesfully")
+		CreateIndex(client,"ParkingSlots","uniqueslotid")
+
 	}
 }
 
@@ -96,7 +101,4 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request){
 		slots = append(slots, slot)
 	}
 	json.NewEncoder(writer).Encode(slots)
-
 }
-
-

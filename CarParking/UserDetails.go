@@ -6,21 +6,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-
-
 type UserDetails struct{
-	FName string
+	FName string 
 	LName string
-	Age int
+	Age int 
 	UserID int
 }
-
 
 func AddUser(writer http.ResponseWriter, res *http.Request) {
 	var user UserDetails
@@ -38,10 +35,9 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 		panic(err)
 	}
 	if result!= nil{
-			fmt.Printf("User Details Inserted Successfully")
+		fmt.Println("User Details Inserted Successfully and UserID is ",user.UserID)
+		CreateIndex(client,"Users","userid")
 	}
-	CreateIndex(client,"Users","userid")
-
 }
 
 func GetUser(writer http.ResponseWriter, res *http.Request) {
@@ -70,9 +66,10 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("Users")
 	params := mux.Vars(req)
-	_id := params["_id"]
-	pid, _ := primitive.ObjectIDFromHex(_id)
-	filter := bson.M{"_id": pid}
+	_userid:=params["_userid"]
+	userid,err := strconv.Atoi(_userid)
+
+	filter := bson.M{"userid": userid}
 	result, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
     	log.Fatal(err)
@@ -80,8 +77,7 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 	if result.DeletedCount == 0{
 		fmt.Println("Data didn't Match to Delete")
 	}else{
-		fmt.Printf("User Details Deleted Succesfully")
+		fmt.Println("User Details Deleted Succesfully")
+		CreateIndex(client,"Users","userid")
 	}
-	CreateIndex(client,"Users","userid")
-
 }
