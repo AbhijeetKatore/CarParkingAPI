@@ -57,6 +57,7 @@ func GetUser(writer http.ResponseWriter, res *http.Request) {
 		}
 		users = append(users, user)
 	}
+	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(users)
 
 }

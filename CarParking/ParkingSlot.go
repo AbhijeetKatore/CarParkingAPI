@@ -100,5 +100,6 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request){
 		}
 		slots = append(slots, slot)
 	}
+	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(slots)
 }

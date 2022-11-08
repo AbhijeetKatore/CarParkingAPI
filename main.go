@@ -8,10 +8,11 @@ import (
 )
 var errConnection error
 func main(){
-	 Connection()
+	
+	Connection()
 }
 
-func Connection()error{
+func Connection(){
 	Router := mux.NewRouter()
 	Router.HandleFunc("/user", CarParking.AddUser).Methods("POST")
 	Router.HandleFunc("/user", CarParking.GetUser).Methods("GET")
@@ -26,6 +27,6 @@ func Connection()error{
 	Router.HandleFunc("/cartoslot/{_userid}/{carnumber}/{_uniqueslotid}", CarParking.AddNewCarToSlot).Methods("PUT")
 	Router.HandleFunc("/cartoslot/{_uniqueslotid}",CarParking.DeleteCarFromSlot).Methods("DELETE")
 
-	errConnection:=http.ListenAndServe(":8080", Router)
-	return errConnection
+	http.ListenAndServe(":8080", Router)
+
 }

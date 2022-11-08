@@ -89,7 +89,7 @@ func GetSlotFromID(uniqueslotid int) (bool){
 func DeleteCarFromSlot(writer http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	// slot_id := params["_uniqueslotid"]
-	uniqueslotid,err := strconv.Atoi(params["_uniqueslotid"])
+	uniqueslotid,_ := strconv.Atoi(params["_uniqueslotid"])
 
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
