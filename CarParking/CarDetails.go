@@ -17,26 +17,30 @@ type CarDetails struct {
 }
 
 func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Headers", "*")
+
 	var car CarDetails
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&car)
-	
-	if err !=nil{
+
+	if err != nil {
 		fmt.Println(err)
 	}
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
-	result,err := collection.InsertOne(context.TODO(), car)
+	result, err := collection.InsertOne(context.TODO(), car)
 	if err != nil {
 		panic(err)
 	}
-	if result!= nil{
-		fmt.Printf("Car Details Inserted Successfully")
-		CreateIndex(client,"CarDetails","carnumber")
+	if result != nil {
+		fmt.Println("Car Details Inserted Successfully")
+		CreateIndex(client, "CarDetails", "carnumber")
 	}
 }
 
-func DeleteCarDetails(writer http.ResponseWriter, req *http.Request){
+func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
 	params := mux.Vars(req)
@@ -45,23 +49,24 @@ func DeleteCarDetails(writer http.ResponseWriter, req *http.Request){
 	filter := bson.M{"carnumber": car_number}
 	result, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
-    	log.Fatal(err)
+		log.Fatal(err)
 	}
-	if result.DeletedCount == 0{
+	if result.DeletedCount == 0 {
 		fmt.Println("Data didn't Match to Delete")
-	}else{
-		fmt.Printf("Car Details Deleted Succesfully")
-		CreateIndex(client,"CarDetails","carnumber")
+	} else {
+		fmt.Println("Car Details Deleted Succesfully")
+		CreateIndex(client, "CarDetails", "carnumber")
 	}
 }
 
-func UpdateCarDetails(writer http.ResponseWriter, req *http.Request){
+func UpdateCarDetails(writer http.ResponseWriter, req *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	var car CarDetails
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&car)
 	params := mux.Vars(req)
 	car_number := params["car_number"]
-	if err!=nil{
+	if err != nil {
 		fmt.Println(err)
 	}
 	client := ConnectDatabase()
@@ -69,9 +74,9 @@ func UpdateCarDetails(writer http.ResponseWriter, req *http.Request){
 	filter := bson.M{"carnumber": car_number}
 
 	update := bson.M{"$set": bson.M{"carnumber": car.CarNumber, "carmodel": car.CarModel}}
-	result,err := collection.UpdateMany(context.TODO(), filter, update)
-	if result!=nil{
+	result, err := collection.UpdateMany(context.TODO(), filter, update)
+	if result != nil {
 		fmt.Println("Data Updated Succesfully")
-		CreateIndex(client,"CarDetails","carnumber")
+		CreateIndex(client, "CarDetails", "carnumber")
 	}
 }

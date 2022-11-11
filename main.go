@@ -6,13 +6,14 @@ import (
 
 	"github.com/gorilla/mux"
 )
-var errConnection error
-func main(){
-	
+
+func main() {
+	//go:generate swagger generate spec -m -o ./swagger.yaml
+
 	Connection()
 }
 
-func Connection(){
+func Connection() {
 	Router := mux.NewRouter()
 	Router.HandleFunc("/user", CarParking.AddUser).Methods("POST")
 	Router.HandleFunc("/user", CarParking.GetUser).Methods("GET")
@@ -25,7 +26,7 @@ func Connection(){
 	Router.HandleFunc("/slot/{_uniqueslotid}", CarParking.UpdateParkingSlot).Methods("PUT")
 	Router.HandleFunc("/slot", CarParking.GetFreeParkingSlots).Methods("GET")
 	Router.HandleFunc("/cartoslot/{_userid}/{carnumber}/{_uniqueslotid}", CarParking.AddNewCarToSlot).Methods("PUT")
-	Router.HandleFunc("/cartoslot/{_uniqueslotid}",CarParking.DeleteCarFromSlot).Methods("DELETE")
+	Router.HandleFunc("/cartoslot/{_uniqueslotid}", CarParking.DeleteCarFromSlot).Methods("DELETE")
 
 	http.ListenAndServe(":8080", Router)
 

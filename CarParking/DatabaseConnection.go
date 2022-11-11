@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,6 +19,7 @@ func ConnectDatabase() *mongo.Client {
 		log.Fatal(err)
 	}
 	return client
+	
 }
 
 func CreateIndex(client *mongo.Client,collec string,field string){
@@ -34,3 +36,7 @@ func CreateIndex(client *mongo.Client,collec string,field string){
 		os.Exit(1) 
 		}
 }
+
+func EnableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	}
