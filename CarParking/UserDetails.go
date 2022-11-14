@@ -13,13 +13,51 @@ import (
 )
 
 type UserDetails struct {
-	FName  string
-	LName  string
-	Age    int
+	// First Name of the user
+	// in: string
+	// required: true
+	FName string
+	// Last Name of the user
+	// in: string
+	// required: true
+	LName string
+	// Age of the user
+	// in: integer
+	// required: true
+	Age int
+	// ID of the user
+	// in: integer
+	// required: true
 	UserID int
 }
 
 func AddUser(writer http.ResponseWriter, res *http.Request) {
+	// POST request
+	//
+	// # Insert documentation
+	//
+	// ---
+	// produces:
+	// - application/json
+	//
+	// parameters:
+	//
+	//   - name: Body
+	//     in: body
+	//     schema:
+	//
+	//         items:
+	//             "$ref": "#/definitions/UserDetails"
+	//         type: object
+	//
+	// responses:
+	//
+	//   '200':
+	//        description: user response
+	//        schema:
+	//          type: object
+	//          items:
+	//            "$ref": "#/definitions/UserDetails"
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 
@@ -43,7 +81,23 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 	}
 }
 
+//GET request
+// # Insert documentation
+// ---
+// produces:
+// - application/json
+//
+// responses:
+//
+//   '200':
+//        description: user response
+//        schema:
+//          type: object
+//          items:
+//            "$ref": "#/definitions/UserDetails"
+
 func GetUser(writer http.ResponseWriter, res *http.Request) {
+
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 
