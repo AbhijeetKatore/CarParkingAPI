@@ -8,11 +8,21 @@ import (
 
 var client = &http.Client{}
 
+func TestServer(test *testing.T) {
+	httpreq, _ := http.NewRequest("GET", "http://localhost:8080", nil)
+	res, err := client.Do(httpreq)
+	if res.StatusCode != http.StatusOK {
+		test.Fatalf("Expected Status OK but got %v", res.StatusCode)
+	}
+	if err != nil {
+		test.Fatalf("%v", err)
+	}
+}
+
 // Test User
 func TestGetUser(test *testing.T) {
 
 	httpreq, _ := http.NewRequest("GET", "http://localhost:8080/user", nil)
-	client := &http.Client{}
 	res, err := client.Do(httpreq)
 	if res.StatusCode != http.StatusOK {
 		test.Fatalf("Expected Status OK but got %v", res.StatusCode)

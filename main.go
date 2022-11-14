@@ -27,7 +27,7 @@ func Connection() {
 	Router.HandleFunc("/slot", CarParking.GetFreeParkingSlots).Methods("GET")
 	Router.HandleFunc("/cartoslot/{_userid}/{carnumber}/{_uniqueslotid}", CarParking.AddNewCarToSlot).Methods("PUT")
 	Router.HandleFunc("/cartoslot/{_uniqueslotid}", CarParking.DeleteCarFromSlot).Methods("DELETE")
-
+	Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
 	http.ListenAndServe(":8080", Router)
 
 }
