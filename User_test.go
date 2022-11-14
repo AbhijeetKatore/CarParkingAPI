@@ -109,17 +109,6 @@ func TestAddCar(test *testing.T) {
 	}
 }
 
-func TestDeleteCar(test *testing.T) {
-	httpreq, err := http.NewRequest("DELETE", "http://localhost:8080/car/MH05AX4158", nil)
-	res, err := client.Do(httpreq)
-	if res.StatusCode != http.StatusOK {
-		test.Fatalf("Car Details Not able to Delete error: %v", res.StatusCode)
-	}
-	if err != nil {
-		test.Fatalf("%v", err)
-	}
-}
-
 func TestUpdateCar(test *testing.T) {
 	body := strings.NewReader(`{
 		"CarNumber" :"MH05AX4158",
@@ -129,6 +118,17 @@ func TestUpdateCar(test *testing.T) {
 	res, err := client.Do(httpreq)
 	if res.StatusCode != http.StatusOK {
 		test.Fatalf("Car Details Not able to Update error: %v", res.StatusCode)
+	}
+	if err != nil {
+		test.Fatalf("%v", err)
+	}
+}
+
+func TestDeleteCar(test *testing.T) {
+	httpreq, err := http.NewRequest("DELETE", "http://localhost:8080/car/MH05AX4158", nil)
+	res, err := client.Do(httpreq)
+	if res.StatusCode != http.StatusOK {
+		test.Fatalf("Car Details Not able to Delete error: %v", res.StatusCode)
 	}
 	if err != nil {
 		test.Fatalf("%v", err)
