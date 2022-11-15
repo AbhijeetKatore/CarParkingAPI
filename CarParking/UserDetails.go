@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	. "github.com/gobeam/mongo-go-pagination"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -96,26 +97,32 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 //          items:
 //            "$ref": "#/definitions/UserDetails"
 
-func GetUser(writer http.ResponseWriter, res *http.Request) {
-
+func GetUser(writer http.ResponseWriter, req *http.Request) {
+	query := req.URL.Query()
+	page, _ := strconv.ParseInt(query["page"][0], 10, 64)
+	var limit int64 = 10
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 
 	var users []UserDetails
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("Users")
-	cursor, _ := collection.Find(context.TODO(), bson.M{})
 
-	defer cursor.Close(context.TODO())
-
-	for cursor.Next(context.TODO()) {
-		var user UserDetails
-		err := cursor.Decode(&user)
-		if err != nil {
-			log.Fatal(err)
-		}
-		users = append(users, user)
+	_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(bson.M{}).Decode(&users).Find()
+	if err != nil {
+		panic(err)
 	}
+	// cursor, _ := collection.Find(context.TODO(), bson.M{})
+	// defer cursor.Close(context.TODO())
+
+	// for cursor.Next(context.TODO()) {
+	// 	var user UserDetails
+	// 	err := cursor.Decode(&user)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	users = append(users, user)
+	// }
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(users)
 
