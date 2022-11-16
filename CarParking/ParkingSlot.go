@@ -86,30 +86,35 @@ func UpdateParkingSlot(writer http.ResponseWriter, req *http.Request) {
 }
 
 func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request) {
-
-	query := req.URL.Query()
-	page, _ := strconv.ParseInt(query["page"][0], 10, 64)
-	var limit int64 = 10
-
 	EnableCors(&writer)
+	query := req.URL.Query()
+	isPageQuery := query.Has("page")
+
 	var slots []SlotDetails
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
 	filter := bson.M{"occupancy": false}
-	_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(filter).Decode(&slots).Find()
-	if err != nil {
-		panic(err)
-	}
-	// cursor, _ := collection.Find(context.TODO(), filter)
 
-	// for cursor.Next(context.TODO()) {
-	// 	var slot SlotDetails
-	// 	err := cursor.Decode(&slot)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	slots = append(slots, slot)
-	// }
+	if isPageQuery {
+		page, _ := strconv.ParseInt(query["page"][0], 10, 64)
+		var limit int64 = 10
+		_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(filter).Decode(&slots).Find()
+		if err != nil {
+			panic(err)
+		}
+
+	} else {
+		cursor, _ := collection.Find(context.TODO(), filter)
+
+		for cursor.Next(context.TODO()) {
+			var slot SlotDetails
+			err := cursor.Decode(&slot)
+			if err != nil {
+				log.Fatal(err)
+			}
+			slots = append(slots, slot)
+		}
+	}
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(slots)
 }

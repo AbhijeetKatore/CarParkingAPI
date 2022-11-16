@@ -99,30 +99,34 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 
 func GetUser(writer http.ResponseWriter, req *http.Request) {
 	query := req.URL.Query()
-	page, _ := strconv.ParseInt(query["page"][0], 10, 64)
-	var limit int64 = 10
+	isPageQuery := query.Has("page")
+
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 
 	var users []UserDetails
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("Users")
+	if isPageQuery {
+		page, _ := strconv.ParseInt(query["page"][0], 10, 64)
+		var limit int64 = 10
+		_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(bson.M{}).Decode(&users).Find()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		cursor, _ := collection.Find(context.TODO(), bson.M{})
+		defer cursor.Close(context.TODO())
 
-	_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(bson.M{}).Decode(&users).Find()
-	if err != nil {
-		panic(err)
+		for cursor.Next(context.TODO()) {
+			var user UserDetails
+			err := cursor.Decode(&user)
+			if err != nil {
+				log.Fatal(err)
+			}
+			users = append(users, user)
+		}
 	}
-	// cursor, _ := collection.Find(context.TODO(), bson.M{})
-	// defer cursor.Close(context.TODO())
-
-	// for cursor.Next(context.TODO()) {
-	// 	var user UserDetails
-	// 	err := cursor.Decode(&user)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	users = append(users, user)
-	// }
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(users)
 
