@@ -14,10 +14,10 @@ import (
 )
 
 type SlotDetails struct {
-	FloorNumber      int
-	UniqueSlotNumber int
-	Occupancy        bool
-	UniqueSlotID     int
+	FloorNumber      int  `json:"FloorNumber"`
+	UniqueSlotNumber int  `json:"UniqueSlotNumber"`
+	Occupancy        bool `json:"Occupancy"`
+	UniqueSlotID     int  `json:"UniqueSlotID"`
 }
 
 func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {

@@ -12,8 +12,8 @@ import (
 )
 
 type CarDetails struct {
-	CarNumber string
-	CarModel  string
+	CarNumber string `json:"CarNumber"`
+	CarModel  string `json:"CarModel"`
 }
 
 func AddCarDetails(writer http.ResponseWriter, req *http.Request) {

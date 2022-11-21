@@ -17,19 +17,19 @@ type UserDetails struct {
 	// First Name of the user
 	// in: string
 	// required: true
-	FName string
+	FName string `json:"FName"`
 	// Last Name of the user
 	// in: string
 	// required: true
-	LName string
+	LName string `json:"LName"`
 	// Age of the user
 	// in: integer
 	// required: true
-	Age int
+	Age int `json:"Age"`
 	// ID of the user
 	// in: integer
 	// required: true
-	UserID int
+	UserID int `json:"UserID"`
 }
 
 func AddUser(writer http.ResponseWriter, res *http.Request) {
