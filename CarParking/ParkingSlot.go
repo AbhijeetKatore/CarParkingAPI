@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	. "github.com/gobeam/mongo-go-pagination"
 	"github.com/gorilla/mux"
@@ -41,9 +42,8 @@ func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	if result != nil {
 		fmt.Println("Slot Details Inserted Successfully")
 		CreateIndex(client, "ParkingSlots", "uniqueslotid")
-
+		fmt.Fprintln(writer, "Slot Details Inserted Successfully ")
 	}
-
 }
 
 func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request) {
@@ -61,6 +61,7 @@ func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request) {
 	} else {
 		fmt.Println("Slot Details Deleted Succesfully")
 		CreateIndex(client, "ParkingSlots", "uniqueslotid")
+		fmt.Fprintln(writer, "Slot Details Deleted Succesfully")
 
 	}
 }
@@ -82,6 +83,8 @@ func UpdateParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	if result != nil {
 		fmt.Println("Slot Details Updated Succesfully")
 		CreateIndex(client, "ParkingSlots", "uniqueslotid")
+		fmt.Fprintln(writer, "Slot Details Updated Succesfully")
+
 	}
 }
 
@@ -89,6 +92,7 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request) {
 	EnableCors(&writer)
 	query := req.URL.Query()
 	isPageQuery := query.Has("page")
+	writer.Header().Set("Content-Type", "application/json")
 
 	var slots []SlotDetails
 	client := ConnectDatabase()
@@ -102,10 +106,14 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			panic(err)
 		}
+		if slots == nil {
+			fmt.Fprintln(writer, "You have reached the END of the Slots List")
+		} else {
+			json.NewEncoder(writer).Encode(slots)
+		}
 
 	} else {
 		cursor, _ := collection.Find(context.TODO(), filter)
-
 		for cursor.Next(context.TODO()) {
 			var slot SlotDetails
 			err := cursor.Decode(&slot)
@@ -114,7 +122,15 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request) {
 			}
 			slots = append(slots, slot)
 		}
+
+		json.NewEncoder(writer).Encode(slots)
 	}
-	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(slots)
+	if isPageQuery {
+		temp, _ := strconv.Atoi(query["page"][0])
+		temp += 1
+		currPage := strconv.Itoa(temp)
+		nextPage := strings.Replace("/user?page=0", "0", currPage, 12)
+		writer.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(writer, "", nextPage)
+	}
 }

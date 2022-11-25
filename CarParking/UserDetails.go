@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	. "github.com/gobeam/mongo-go-pagination"
 	"github.com/gorilla/mux"
@@ -79,7 +80,9 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 	if result != nil {
 		fmt.Println("User Details Inserted Successfully and UserID is ", user.UserID)
 		CreateIndex(client, "Users", "userid")
+		fmt.Fprintln(writer, "User Details Inserted Successfully and UserID is ", user.UserID)
 	}
+
 }
 
 //GET request
@@ -100,7 +103,7 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 func GetUser(writer http.ResponseWriter, req *http.Request) {
 	query := req.URL.Query()
 	isPageQuery := query.Has("page")
-
+	writer.Header().Set("Content-Type", "application/json")
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -114,6 +117,11 @@ func GetUser(writer http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			panic(err)
 		}
+		if users == nil {
+			fmt.Fprintln(writer, "You have reached the END of the Users List")
+		} else {
+			json.NewEncoder(writer).Encode(users)
+		}
 	} else {
 		cursor, _ := collection.Find(context.TODO(), bson.M{})
 		defer cursor.Close(context.TODO())
@@ -125,11 +133,17 @@ func GetUser(writer http.ResponseWriter, req *http.Request) {
 				log.Fatal(err)
 			}
 			users = append(users, user)
+			json.NewEncoder(writer).Encode(users)
 		}
 	}
-	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(users)
-
+	if isPageQuery {
+		temp, _ := strconv.Atoi(query["page"][0])
+		temp += 1
+		currPage := strconv.Itoa(temp)
+		nextPage := strings.Replace("/user?page=0", "0", currPage, 12)
+		writer.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(writer, "", nextPage)
+	}
 }
 
 func DeleteUser(writer http.ResponseWriter, req *http.Request) {
@@ -140,6 +154,7 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	_userid := params["_userid"]
 	userid, err := strconv.Atoi(_userid)
+	fmt.Println(userid)
 	filter := bson.M{"userid": userid}
 	result, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
@@ -150,5 +165,7 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 	} else {
 		fmt.Println("User Details Deleted Succesfully")
 		CreateIndex(client, "Users", "userid")
+		fmt.Fprintln(writer, "User Details Deleted Succesfully")
+
 	}
 }
