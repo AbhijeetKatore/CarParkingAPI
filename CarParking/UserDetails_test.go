@@ -69,6 +69,13 @@ func TestGetUser(t *testing.T) {
 				req:    httptest.NewRequest("GET", "/user?page=2", nil),
 			},
 		},
+		{
+			name: "Test with overflown Query value",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("GET", "/user?page=9", nil),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -85,7 +92,6 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	httpreq := httptest.NewRequest(http.MethodDelete, "/user/16/", nil)
 	recorder := httptest.NewRecorder()
 	type args struct {
 		writer http.ResponseWriter
@@ -97,10 +103,17 @@ func TestDeleteUser(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "Test1",
+			name: "Delete case with Available field",
 			args: args{
 				writer: recorder,
-				req:    httpreq,
+				req:    httptest.NewRequest(http.MethodDelete, "/user", strings.NewReader(`{"userid":55}`)),
+			},
+		},
+		{
+			name: "Delete case with Not Available field",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest(http.MethodDelete, "/user", strings.NewReader(`{"userid":59}`)),
 			},
 		},
 	}

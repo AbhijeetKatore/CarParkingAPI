@@ -2,6 +2,7 @@ package CarParking
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -91,14 +92,16 @@ func GetSlotFromID(uniqueslotid int) bool {
 }
 
 func DeleteCarFromSlot(writer http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	// slot_id := params["_uniqueslotid"]
-	uniqueslotid, _ := strconv.Atoi(params["_uniqueslotid"])
+	type response struct {
+		UniqueSlotID int
+	}
+	decoder := json.NewDecoder(req.Body)
+	var resp response
+	err := decoder.Decode(&resp)
 
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
-	filter := bson.D{{"uniqueslotid", uniqueslotid}}
-	result, err := collection.DeleteMany(context.TODO(), filter)
+	result, err := collection.DeleteMany(context.TODO(), resp)
 	if err != nil {
 		log.Fatal(err)
 	}

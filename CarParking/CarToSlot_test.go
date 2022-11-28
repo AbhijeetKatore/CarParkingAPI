@@ -2,7 +2,9 @@ package CarParking
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -98,6 +100,8 @@ func TestGetSlotFromID(t *testing.T) {
 }
 
 func TestDeleteCarFromSlot(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
 	type args struct {
 		writer http.ResponseWriter
 		req    *http.Request
@@ -107,6 +111,13 @@ func TestDeleteCarFromSlot(t *testing.T) {
 		args args
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test1",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("DELETE", "/cartoslot", strings.NewReader(`{"uniqueslotid":49}`)),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

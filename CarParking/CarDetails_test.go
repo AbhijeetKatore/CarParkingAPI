@@ -59,7 +59,7 @@ func TestDeleteCarDetails(t *testing.T) {
 			name: "Test1",
 			args: args{
 				writer: recorder,
-				req:    httptest.NewRequest("DELETE", "/car/MH05AX4158", nil),
+				req:    httptest.NewRequest("DELETE", "/car", strings.NewReader(`{"carnumber":"MH05AX4158"}`)),
 			},
 		},
 	}

@@ -47,12 +47,18 @@ func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request) {
+	type response struct {
+		UniqueSlotID int
+	}
+	decoder := json.NewDecoder(req.Body)
+	var resp response
+	err := decoder.Decode(&resp)
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
-	params := mux.Vars(req)
-	uniqueslotid, err := strconv.Atoi(params["_uniqueslotid"])
-	filter := bson.M{"uniqueslotid": uniqueslotid}
-	result, err := collection.DeleteMany(context.TODO(), filter)
+	// params := mux.Vars(req)
+	// uniqueslotid, err := strconv.Atoi(params["_uniqueslotid"])
+	// filter := bson.M{"uniqueslotid": uniqueslotid}
+	result, err := collection.DeleteMany(context.TODO(), resp)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,16 +108,25 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request) {
 	if isPageQuery {
 		page, _ := strconv.ParseInt(query["page"][0], 10, 64)
 		var limit int64 = 10
-		_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(filter).Decode(&slots).Find()
-		if err != nil {
-			panic(err)
-		}
-		if slots == nil {
-			fmt.Fprintln(writer, "You have reached the END of the Slots List")
+		if page > 0 {
+			_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(filter).Decode(&slots).Find()
+			if err != nil {
+				panic(err)
+			}
+			if slots == nil {
+				fmt.Fprintln(writer, "You have reached the END of the Slots List")
+			} else {
+				json.NewEncoder(writer).Encode(slots)
+				temp, _ := strconv.Atoi(query["page"][0])
+				temp += 1
+				currPage := strconv.Itoa(temp)
+				nextPage := strings.Replace("/slot?page=0", "0", currPage, 12)
+				writer.Header().Set("Content-Type", "application/json")
+				fmt.Fprintln(writer, "", nextPage)
+			}
 		} else {
-			json.NewEncoder(writer).Encode(slots)
+			fmt.Fprintln(writer, "This page does not exist.")
 		}
-
 	} else {
 		cursor, _ := collection.Find(context.TODO(), filter)
 		for cursor.Next(context.TODO()) {
@@ -122,15 +137,6 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request) {
 			}
 			slots = append(slots, slot)
 		}
-
 		json.NewEncoder(writer).Encode(slots)
-	}
-	if isPageQuery {
-		temp, _ := strconv.Atoi(query["page"][0])
-		temp += 1
-		currPage := strconv.Itoa(temp)
-		nextPage := strings.Replace("/user?page=0", "0", currPage, 12)
-		writer.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(writer, "", nextPage)
 	}
 }

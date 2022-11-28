@@ -44,6 +44,7 @@ func TestAddParkingSlot(t *testing.T) {
 }
 
 func TestDeleteParkingSlots(t *testing.T) {
+	recorder := httptest.NewRecorder()
 	type args struct {
 		writer http.ResponseWriter
 		req    *http.Request
@@ -53,6 +54,13 @@ func TestDeleteParkingSlots(t *testing.T) {
 		args args
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test1",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("DELETE", "/slot", strings.NewReader(`{"uniqueslotid":50}`)),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -100,6 +108,13 @@ func TestGetFreeParkingSlots(t *testing.T) {
 		},
 		{
 			name: "Test with query",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("GET", "/slot?page=1", nil),
+			},
+		},
+		{
+			name: "Test with overflown Query value",
 			args: args{
 				writer: recorder,
 				req:    httptest.NewRequest("GET", "/slot?page=1", nil),

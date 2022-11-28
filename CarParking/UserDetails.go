@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	. "github.com/gobeam/mongo-go-pagination"
-	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -79,7 +78,7 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 	}
 	if result != nil {
 		fmt.Println("User Details Inserted Successfully and UserID is ", user.UserID)
-		CreateIndex(client, "Users", "userid")
+		defer CreateIndex(client, "Users", "userid")
 		fmt.Fprintln(writer, "User Details Inserted Successfully and UserID is ", user.UserID)
 	}
 
@@ -113,16 +112,27 @@ func GetUser(writer http.ResponseWriter, req *http.Request) {
 	if isPageQuery {
 		page, _ := strconv.ParseInt(query["page"][0], 10, 64)
 		var limit int64 = 10
-		_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(bson.M{}).Decode(&users).Find()
-		if err != nil {
-			panic(err)
-		}
-		if users == nil {
-			fmt.Fprintln(writer, "You have reached the END of the Users List")
+		if page > 0 {
+			_, err := New(collection).Context(context.TODO()).Limit(limit).Page(page).Filter(bson.M{}).Decode(&users).Find()
+			if err != nil {
+				panic(err)
+			}
+			if users == nil {
+				fmt.Fprintln(writer, "You have reached the END of the Users List")
+			} else {
+				json.NewEncoder(writer).Encode(users)
+				temp, _ := strconv.Atoi(query["page"][0])
+				temp += 1
+				currPage := strconv.Itoa(temp)
+				nextPage := strings.Replace("/user?page=0", "0", currPage, 12)
+				writer.Header().Set("Content-Type", "application/json")
+				fmt.Fprintln(writer, "", nextPage)
+			}
 		} else {
-			json.NewEncoder(writer).Encode(users)
+			fmt.Fprintln(writer, "This page does not exist.")
 		}
 	} else {
+		// fmt.Fprintln(writer, "This page does not exist.")
 		cursor, _ := collection.Find(context.TODO(), bson.M{})
 		defer cursor.Close(context.TODO())
 
@@ -136,27 +146,23 @@ func GetUser(writer http.ResponseWriter, req *http.Request) {
 			json.NewEncoder(writer).Encode(users)
 		}
 	}
-	if isPageQuery {
-		temp, _ := strconv.Atoi(query["page"][0])
-		temp += 1
-		currPage := strconv.Itoa(temp)
-		nextPage := strings.Replace("/user?page=0", "0", currPage, 12)
-		writer.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(writer, "", nextPage)
-	}
 }
 
 func DeleteUser(writer http.ResponseWriter, req *http.Request) {
+	type response struct {
+		UserID int
+	}
+	var resp response
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&resp)
+	if err != nil {
+		fmt.Println(err)
+	}
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("Users")
-	params := mux.Vars(req)
-	_userid := params["_userid"]
-	userid, err := strconv.Atoi(_userid)
-	fmt.Println(userid)
-	filter := bson.M{"userid": userid}
-	result, err := collection.DeleteMany(context.TODO(), filter)
+	result, err := collection.DeleteMany(context.TODO(), resp)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -23,10 +23,6 @@ func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
 	var car CarDetails
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&car)
-
-	if err != nil {
-		fmt.Println(err)
-	}
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
 	result, err := collection.InsertOne(context.TODO(), car)
@@ -35,19 +31,23 @@ func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
 	}
 	if result != nil {
 		fmt.Println("Car Details Inserted Successfully")
+		fmt.Fprintln(writer, "Car Details Inserted Successfully ")
 		CreateIndex(client, "CarDetails", "carnumber")
 	}
 }
 
 func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
+	type response struct {
+		CarNumber string
+	}
+	var resp response
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&resp)
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
-	params := mux.Vars(req)
-	car_number := params["car_number"]
 
-	filter := bson.M{"carnumber": car_number}
-	result, err := collection.DeleteMany(context.TODO(), filter)
+	result, err := collection.DeleteMany(context.TODO(), resp)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,6 +55,7 @@ func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
 		fmt.Println("Data didn't Match to Delete")
 	} else {
 		fmt.Println("Car Details Deleted Succesfully")
+		fmt.Fprintln(writer, "Car Details Deleted Successfully ")
 		CreateIndex(client, "CarDetails", "carnumber")
 	}
 }
