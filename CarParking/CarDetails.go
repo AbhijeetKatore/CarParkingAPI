@@ -19,10 +19,11 @@ type CarDetails struct {
 func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Headers", "*")
+	defer notUnique("The Car Number you have entered already exists please Enter Correct one.")
 
 	var car CarDetails
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&car)
+	decoder.Decode(&car)
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
 	result, err := collection.InsertOne(context.TODO(), car)
@@ -42,7 +43,7 @@ func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
 	}
 	var resp response
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&resp)
+	decoder.Decode(&resp)
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
@@ -61,7 +62,6 @@ func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
 }
 
 func UpdateCarDetails(writer http.ResponseWriter, req *http.Request) {
-	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	var car CarDetails
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&car)
@@ -70,14 +70,21 @@ func UpdateCarDetails(writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(car_number)
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
 	filter := bson.M{"carnumber": car_number}
 
 	update := bson.M{"$set": bson.M{"carnumber": car.CarNumber, "carmodel": car.CarModel}}
-	result, err := collection.UpdateMany(context.TODO(), filter, update)
-	if result != nil {
-		fmt.Println("Data Updated Succesfully")
-		CreateIndex(client, "CarDetails", "carnumber")
+	result, _ := collection.UpdateMany(context.TODO(), filter, update)
+	if result.MatchedCount > 0 {
+		if result.ModifiedCount > 0 {
+			fmt.Println("Car Details Updated Succesfully")
+			CreateIndex(client, "CarDetails", "carnumber")
+			fmt.Fprintln(writer, "Car Details Updated Succesfully")
+		}
+	} else {
+		fmt.Println("Car Details did not matched with existing details to update")
+		fmt.Fprintln(writer, "Car Details did not matched with existing details to update")
 	}
 }

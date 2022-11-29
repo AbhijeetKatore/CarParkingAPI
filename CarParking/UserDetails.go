@@ -61,7 +61,7 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 	//            "$ref": "#/definitions/UserDetails"
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
-
+	defer notUnique("The User ID you have entered already exists please use another one.")
 	var user UserDetails
 	decoder := json.NewDecoder(res.Body)
 	err := decoder.Decode(&user)
@@ -81,7 +81,11 @@ func AddUser(writer http.ResponseWriter, res *http.Request) {
 		defer CreateIndex(client, "Users", "userid")
 		fmt.Fprintln(writer, "User Details Inserted Successfully and UserID is ", user.UserID)
 	}
-
+}
+func notUnique(s string) {
+	if r := recover(); r != nil {
+		fmt.Println(s)
+	}
 }
 
 //GET request
@@ -172,6 +176,5 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 		fmt.Println("User Details Deleted Succesfully")
 		CreateIndex(client, "Users", "userid")
 		fmt.Fprintln(writer, "User Details Deleted Succesfully")
-
 	}
 }

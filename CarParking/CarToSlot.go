@@ -97,7 +97,7 @@ func DeleteCarFromSlot(writer http.ResponseWriter, req *http.Request) {
 	}
 	decoder := json.NewDecoder(req.Body)
 	var resp response
-	err := decoder.Decode(&resp)
+	decoder.Decode(&resp)
 
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")

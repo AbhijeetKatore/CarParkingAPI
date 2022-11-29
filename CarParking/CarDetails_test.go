@@ -66,11 +66,20 @@ func TestDeleteCarDetails(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			DeleteCarDetails(tt.args.writer, tt.args.req)
+			res := recorder.Result()
+			if res.StatusCode != http.StatusOK {
+				t.Fatalf("Expected Status OK but got %v", res.StatusCode)
+			}
 		})
 	}
 }
 
 func TestUpdateCarDetails(t *testing.T) {
+	body := strings.NewReader(`{
+	"CarNumber" :"MH05AX4158",
+	"CarModel"  :"Hyundai i20"
+}`)
+	recorder := httptest.NewRecorder()
 	type args struct {
 		writer http.ResponseWriter
 		req    *http.Request
@@ -80,10 +89,21 @@ func TestUpdateCarDetails(t *testing.T) {
 		args args
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test1",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("PUT", "/car/md", body),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			UpdateCarDetails(tt.args.writer, tt.args.req)
+			res := recorder.Result()
+			if res.StatusCode != http.StatusOK {
+				t.Fatalf("Expected Status OK but got %v", res.StatusCode)
+			}
 		})
 	}
 }

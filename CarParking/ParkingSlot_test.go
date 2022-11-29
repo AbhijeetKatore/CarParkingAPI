@@ -65,6 +65,10 @@ func TestDeleteParkingSlots(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			DeleteParkingSlots(tt.args.writer, tt.args.req)
+			res := recorder.Result()
+			if res.StatusCode != http.StatusOK {
+				t.Fatalf("Expected Status OK but got %v", res.StatusCode)
+			}
 		})
 	}
 }
@@ -83,6 +87,7 @@ func TestUpdateParkingSlot(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			UpdateParkingSlot(tt.args.writer, tt.args.req)
+
 		})
 	}
 }

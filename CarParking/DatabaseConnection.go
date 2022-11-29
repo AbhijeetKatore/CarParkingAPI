@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,13 +27,7 @@ func CreateIndex(client *mongo.Client, collec string, field string) {
 			field: -1,
 		}, Options: options.Index().SetUnique(true),
 	}
-
-	_, err := collection.Indexes().CreateOne(context.TODO(), indexModel)
-	if err != nil {
-		panic(err)
-		os.Exit(1)
-
-	}
+	collection.Indexes().CreateOne(context.TODO(), indexModel)
 }
 
 func EnableCors(w *http.ResponseWriter) {

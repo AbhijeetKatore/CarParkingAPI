@@ -66,7 +66,7 @@ func TestGetUser(t *testing.T) {
 			name: "Test with Query",
 			args: args{
 				writer: recorder,
-				req:    httptest.NewRequest("GET", "/user?page=2", nil),
+				req:    httptest.NewRequest("GET", "/user?page=1", nil),
 			},
 		},
 		{
@@ -74,6 +74,13 @@ func TestGetUser(t *testing.T) {
 			args: args{
 				writer: recorder,
 				req:    httptest.NewRequest("GET", "/user?page=9", nil),
+			},
+		},
+		{
+			name: "Test with Wrong Query value",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("GET", "/user?page=abcd", nil),
 			},
 		},
 	}

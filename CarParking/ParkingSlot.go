@@ -29,6 +29,7 @@ func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	defer notUnique("The Slot Details you have entered already exists please Enter Correct one.")
 
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
@@ -52,7 +53,7 @@ func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request) {
 	}
 	decoder := json.NewDecoder(req.Body)
 	var resp response
-	err := decoder.Decode(&resp)
+	decoder.Decode(&resp)
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
 	// params := mux.Vars(req)
@@ -86,7 +87,7 @@ func UpdateParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	update := bson.M{"$set": bson.M{"floornumber": slot.FloorNumber, "uniqueslotnumber": slot.UniqueSlotNumber, "occupancy": slot.Occupancy}}
 
 	result, err := collection.UpdateMany(context.TODO(), filter, update)
-	if result != nil {
+	if result.ModifiedCount > 0 {
 		fmt.Println("Slot Details Updated Succesfully")
 		CreateIndex(client, "ParkingSlots", "uniqueslotid")
 		fmt.Fprintln(writer, "Slot Details Updated Succesfully")

@@ -3,7 +3,6 @@ package CarParking
 import (
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"strings"
 	"testing"
 )
@@ -40,13 +39,25 @@ func TestGetUserFromID(t *testing.T) {
 		want1 bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test for False case",
+			args: args{
+				user_id: 0,
+			},
+			want1: false,
+		},
+		{
+			name: "Test for True case",
+			args: args{
+				user_id: 1,
+			},
+			want1: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := GetUserFromID(tt.args.user_id)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetUserFromID() got = %v, want %v", got, tt.want)
-			}
+			_, got1 := GetUserFromID(tt.args.user_id)
+
 			if got1 != tt.want1 {
 				t.Errorf("GetUserFromID() got1 = %v, want %v", got1, tt.want1)
 			}
@@ -65,13 +76,25 @@ func TestGetCarFromID(t *testing.T) {
 		want1 bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test for False case",
+			args: args{
+				carnumber: "",
+			},
+			want1: false,
+		},
+		{
+			name: "Test for True case",
+			args: args{
+				carnumber: "MH27V4099",
+			},
+			want1: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := GetCarFromID(tt.args.carnumber)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetCarFromID() got = %v, want %v", got, tt.want)
-			}
+			_, got1 := GetCarFromID(tt.args.carnumber)
+
 			if got1 != tt.want1 {
 				t.Errorf("GetCarFromID() got1 = %v, want %v", got1, tt.want1)
 			}
@@ -89,6 +112,20 @@ func TestGetSlotFromID(t *testing.T) {
 		want bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test1",
+			args: args{
+				uniqueslotid: 4,
+			},
+			want: true,
+		},
+		{
+			name: "Test1",
+			args: args{
+				uniqueslotid: 0,
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -122,6 +159,10 @@ func TestDeleteCarFromSlot(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			DeleteCarFromSlot(tt.args.writer, tt.args.req)
+			res := recorder.Result()
+			if res.StatusCode != http.StatusOK {
+				t.Fatalf("Expected Status OK but got %v", res.StatusCode)
+			}
 		})
 	}
 }
