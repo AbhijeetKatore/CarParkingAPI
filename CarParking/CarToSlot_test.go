@@ -8,9 +8,8 @@ import (
 )
 
 func TestAddNewCarToSlot(t *testing.T) {
-	// body:=strings.NewReader(`{
 
-	// }`)
+	recorder := httptest.NewRecorder()
 	type args struct {
 		writer http.ResponseWriter
 		req    *http.Request
@@ -20,10 +19,21 @@ func TestAddNewCarToSlot(t *testing.T) {
 		args args
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test1",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("PUT", "/cartoslot/2/MH05AX4158/3", nil),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			AddNewCarToSlot(tt.args.writer, tt.args.req)
+			res := recorder.Result()
+			if res.StatusCode != http.StatusOK {
+				t.Fatalf("Expected Status OK but got %v", res.StatusCode)
+			}
 		})
 	}
 }
@@ -146,7 +156,6 @@ func TestDeleteCarFromSlot(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-
 	}{
 		// TODO: Add test cases.
 		{
