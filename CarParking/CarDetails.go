@@ -82,6 +82,9 @@ func UpdateCarDetails(writer http.ResponseWriter, req *http.Request) {
 			fmt.Println("Car Details Updated Succesfully")
 			CreateIndex(client, "CarDetails", "carnumber")
 			fmt.Fprintln(writer, "Car Details Updated Succesfully")
+		} else {
+			fmt.Println("Car Details not Updated")
+			fmt.Fprintln(writer, "Car Details not Updated")
 		}
 	} else {
 		fmt.Println("Car Details did not matched with existing details to update")

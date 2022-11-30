@@ -87,11 +87,19 @@ func UpdateParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	update := bson.M{"$set": bson.M{"floornumber": slot.FloorNumber, "uniqueslotnumber": slot.UniqueSlotNumber, "occupancy": slot.Occupancy}}
 
 	result, err := collection.UpdateMany(context.TODO(), filter, update)
-	if result.ModifiedCount > 0 {
-		fmt.Println("Slot Details Updated Succesfully")
-		CreateIndex(client, "ParkingSlots", "uniqueslotid")
-		fmt.Fprintln(writer, "Slot Details Updated Succesfully")
+	if result.MatchedCount > 0 {
+		if result.ModifiedCount > 0 {
+			fmt.Println("Slot Details Updated Succesfully")
+			CreateIndex(client, "ParkingSlots", "uniqueslotid")
+			fmt.Fprintln(writer, "Slot Details Updated Succesfully")
 
+		} else {
+			fmt.Println("Slot Details not Updated")
+			fmt.Fprintln(writer, "Slot Details not Updated")
+		}
+	} else {
+		fmt.Println("Slot Details did not matched with existing details to update")
+		fmt.Fprintln(writer, "Slot Details did not matched with existing details to update")
 	}
 }
 

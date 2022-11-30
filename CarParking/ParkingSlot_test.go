@@ -74,6 +74,7 @@ func TestDeleteParkingSlots(t *testing.T) {
 }
 
 func TestUpdateParkingSlot(t *testing.T) {
+	recorder := httptest.NewRecorder()
 	type args struct {
 		writer http.ResponseWriter
 		req    *http.Request
@@ -83,11 +84,25 @@ func TestUpdateParkingSlot(t *testing.T) {
 		args args
 	}{
 		// TODO: Add test cases.
+		{
+			name: "Test1",
+			args: args{
+				writer: recorder,
+				req: httptest.NewRequest("PUT", "/slot/2", strings.NewReader(`{
+					"FloorNumber" : 1111,
+					"UniqueSlotNumber" : 1111,
+					"Occupancy" :  false
+				}`)),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			UpdateParkingSlot(tt.args.writer, tt.args.req)
-
+			res := recorder.Result()
+			if res.StatusCode != http.StatusOK {
+				t.Fatalf("Expected Status OK but got %v", res.StatusCode)
+			}
 		})
 	}
 }
@@ -122,7 +137,14 @@ func TestGetFreeParkingSlots(t *testing.T) {
 			name: "Test with overflown Query value",
 			args: args{
 				writer: recorder,
-				req:    httptest.NewRequest("GET", "/slot?page=1", nil),
+				req:    httptest.NewRequest("GET", "/slot?page=9", nil),
+			},
+		},
+		{
+			name: "Test with wrong Query value",
+			args: args{
+				writer: recorder,
+				req:    httptest.NewRequest("GET", "/slot?page=abcd", nil),
 			},
 		},
 	}
