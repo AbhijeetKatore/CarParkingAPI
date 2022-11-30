@@ -19,7 +19,7 @@ type CarDetails struct {
 func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Headers", "*")
-	defer notUnique("The Car Number you have entered already exists please Enter Correct one.")
+	defer notUnique("The Car Number you have entered already exists please Enter Correct one.", writer)
 
 	var car CarDetails
 	decoder := json.NewDecoder(req.Body)

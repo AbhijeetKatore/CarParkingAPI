@@ -2,6 +2,7 @@ package CarParking
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -32,4 +33,10 @@ func CreateIndex(client *mongo.Client, collec string, field string) {
 
 func EnableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+func notUnique(s string, w http.ResponseWriter) {
+	if r := recover(); r != nil {
+		fmt.Println(s)
+		fmt.Fprintln(w, s)
+	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -24,25 +23,16 @@ type SlotDetails struct {
 func AddParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	var slot SlotDetails
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&slot)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer notUnique("The Slot Details you have entered already exists please Enter Correct one.")
-
+	decoder.Decode(&slot)
+	defer notUnique("The Slot Details you have entered already exists please Enter Correct one.", writer)
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
-	count, _ := collection.CountDocuments(context.TODO(), bson.D{})
-	slot.UniqueSlotID = int(count) + 1
-	result, err := collection.InsertOne(context.TODO(), slot)
-
-	if err != nil {
-		panic(err)
-	}
+	// count, _ := collection.CountDocuments(context.TODO(), bson.D{})
+	// slot.UniqueSlotID = int(count) + 1
+	result, _ := collection.InsertOne(context.TODO(), slot)
 	if result != nil {
 		fmt.Println("Slot Details Inserted Successfully")
-		CreateIndex(client, "ParkingSlots", "uniqueslotid")
+		defer CreateIndex(client, "ParkingSlots", "uniqueslotid")
 		fmt.Fprintln(writer, "Slot Details Inserted Successfully ")
 	}
 }
@@ -59,10 +49,8 @@ func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request) {
 	// params := mux.Vars(req)
 	// uniqueslotid, err := strconv.Atoi(params["_uniqueslotid"])
 	// filter := bson.M{"uniqueslotid": uniqueslotid}
-	result, err := collection.DeleteMany(context.TODO(), resp)
-	if err != nil {
-		log.Fatal(err)
-	}
+	result, _ := collection.DeleteMany(context.TODO(), resp)
+
 	if result.DeletedCount == 0 {
 		fmt.Println("Data didn't Match to Delete")
 	} else {
@@ -75,18 +63,16 @@ func DeleteParkingSlots(writer http.ResponseWriter, req *http.Request) {
 func UpdateParkingSlot(writer http.ResponseWriter, req *http.Request) {
 	var slot SlotDetails
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&slot)
-	if err != nil {
-		fmt.Println(err)
-	}
+	decoder.Decode(&slot)
+
 	params := mux.Vars(req)
-	uniqueslotid, err := strconv.Atoi(params["_uniqueslotid"])
+	uniqueslotid, _ := strconv.Atoi(params["_uniqueslotid"])
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("ParkingSlots")
 	filter := bson.M{"uniqueslotid": uniqueslotid}
 	update := bson.M{"$set": bson.M{"floornumber": slot.FloorNumber, "uniqueslotnumber": slot.UniqueSlotNumber, "occupancy": slot.Occupancy}}
 
-	result, err := collection.UpdateMany(context.TODO(), filter, update)
+	result, _ := collection.UpdateMany(context.TODO(), filter, update)
 	if result.MatchedCount > 0 {
 		if result.ModifiedCount > 0 {
 			fmt.Println("Slot Details Updated Succesfully")
@@ -140,10 +126,7 @@ func GetFreeParkingSlots(writer http.ResponseWriter, req *http.Request) {
 		cursor, _ := collection.Find(context.TODO(), filter)
 		for cursor.Next(context.TODO()) {
 			var slot SlotDetails
-			err := cursor.Decode(&slot)
-			if err != nil {
-				log.Fatal(err)
-			}
+			cursor.Decode(&slot)
 			slots = append(slots, slot)
 		}
 		json.NewEncoder(writer).Encode(slots)
