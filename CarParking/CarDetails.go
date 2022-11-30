@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -26,10 +25,8 @@ func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
 	decoder.Decode(&car)
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
-	result, err := collection.InsertOne(context.TODO(), car)
-	if err != nil {
-		panic(err)
-	}
+	result, _ := collection.InsertOne(context.TODO(), car)
+
 	if result != nil {
 		fmt.Println("Car Details Inserted Successfully")
 		fmt.Fprintln(writer, "Car Details Inserted Successfully ")
@@ -48,10 +45,8 @@ func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
 
-	result, err := collection.DeleteMany(context.TODO(), resp)
-	if err != nil {
-		log.Fatal(err)
-	}
+	result, _ := collection.DeleteMany(context.TODO(), resp)
+
 	if result.DeletedCount == 0 {
 		fmt.Println("Data didn't Match to Delete")
 	} else {
@@ -64,12 +59,10 @@ func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
 func UpdateCarDetails(writer http.ResponseWriter, req *http.Request) {
 	var car CarDetails
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&car)
+	decoder.Decode(&car)
 	params := mux.Vars(req)
 	car_number := params["car_number"]
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	fmt.Println(car_number)
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("CarDetails")
