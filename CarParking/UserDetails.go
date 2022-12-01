@@ -163,10 +163,7 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 	client := ConnectDatabase()
 	collection := client.Database("CarParking").Collection("Users")
-	result, err := collection.DeleteMany(context.TODO(), resp)
-	if err != nil {
-		log.Fatal(err)
-	}
+	result, _ := collection.DeleteMany(context.TODO(), resp)
 	if result.DeletedCount == 0 {
 		fmt.Println("Data didn't Match to Delete")
 	} else {
