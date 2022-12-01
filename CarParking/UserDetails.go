@@ -32,33 +32,35 @@ type UserDetails struct {
 	UserID int `json:"UserID"`
 }
 
+// POST request
+//
+// # Insert documentation
+//
+// ---
+// produces:
+// - application/json
+//
+// parameters:
+//
+//   - name: Body
+//     in: body
+//     schema:
+//
+//     items:
+//     "$ref": "#/definitions/UserDetails"
+//     type: object
+//
+// responses:
+//
+//	'200':
+//	     description: user response
+//	     schema:
+//	       type: object
+//	       items:
+//	         "$ref": "#/definitions/UserDetails"
+//	         "$ref": "#/definitions/UserDetails"
 func AddUser(writer http.ResponseWriter, res *http.Request) {
-	// POST request
-	//
-	// # Insert documentation
-	//
-	// ---
-	// produces:
-	// - application/json
-	//
-	// parameters:
-	//
-	//   - name: Body
-	//     in: body
-	//     schema:
-	//
-	//         items:
-	//             "$ref": "#/definitions/UserDetails"
-	//         type: object
-	//
-	// responses:
-	//
-	//   '200':
-	//        description: user response
-	//        schema:
-	//          type: object
-	//          items:
-	//            "$ref": "#/definitions/UserDetails"
+
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "*")
 	defer notUnique("The User ID you have entered already exists please use another one.", writer)
