@@ -172,3 +172,5 @@ func DeleteUser(writer http.ResponseWriter, req *http.Request) {
 		fmt.Fprintln(writer, "User Details Deleted Succesfully")
 	}
 }
+
+

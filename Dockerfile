@@ -43,3 +43,32 @@ RUN sudo apt install -y systemctl
 RUN sudo systemctl enable mongod
 RUN sudo systemctl daemon-reload
 RUN sudo systemctl start mongod
+
+
+
+FROM       ubuntu:16.04
+RUN apt update
+RUN apt-get install -y wget
+RUN apt install sudo 
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+RUN echo "deb http://repo.mongodb.org/apt/ubuntu $(cat /etc/lsb-release | grep DISTRIB_CODENAME | cut -d= -f2)/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+RUN apt update
+RUN apt install -y mongodb-org
+RUN mkdir -p /data/db
+EXPOSE 27017
+ENTRYPOINT ["/usr/bin/mongod"]
+
+
+FROM       ubuntu:16.04
+RUN apt update
+RUN apt-get install -y wget
+RUN apt install sudo 
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+RUN echo "deb http://repo.mongodb.org/apt/ubuntu $(cat /etc/lsb-release | grep DISTRIB_CODENAME | cut -d= -f2)/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+RUN apt update
+RUN apt install -y mongodb-org
+RUN mkdir -p /data/db
+EXPOSE 27017
+RUN apt install -y golang-go 
+COPY ./a.go ./
+ENTRYPOINT ["/usr/bin/mongod"]

@@ -35,10 +35,10 @@ func AddCarDetails(writer http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteCarDetails(writer http.ResponseWriter, req *http.Request) {
-	type response struct {
+	type request struct {
 		CarNumber string
 	}
-	var resp response
+	var resp request
 	decoder := json.NewDecoder(req.Body)
 	decoder.Decode(&resp)
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
