@@ -72,3 +72,51 @@ EXPOSE 27017
 RUN apt install -y golang-go 
 COPY ./a.go ./
 ENTRYPOINT ["/usr/bin/mongod"]
+
+
+
+
+
+
+
+
+
+
+
+
+FROM golang:1.19
+WORKDIR /usr/src/app
+COPY ./ ./
+RUN go mod download && go mod verify
+COPY . .
+RUN go build -v -o app ./
+EXPOSE 8080
+CMD ["app"]
+
+
+
+
+
+FROM golang:1.19
+WORKDIR /usr/src/app
+COPY ./ ./
+RUN go mod download && go mod verify
+COPY . .
+RUN go build -v -o /usr/local/bin/app ./...
+EXPOSE 8080
+CMD ["app"]
+
+
+
+
+
+FROM golang:1.19
+WORKDIR /usr/src/app
+COPY ./ ./
+RUN go mod download && go mod verify
+COPY . .
+RUN go build -v -o ./op/
+EXPOSE 8080
+RUN ls /usr/src/app/op/
+RUN ls /usr/src/app/
+CMD ["/usr/src/app/op/CarParking"]
