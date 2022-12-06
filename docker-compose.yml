@@ -1,12 +1,17 @@
 version: "3"
 services:
-  db:
+  mongo_db:
     image: mongo
+    restart: always
     ports:
       - 27017:27017
+    volumes:
+      - mongo_db:/data/db
   app:
-    build:
-      dockerfile: Dockerfile
+    build: ./
     container_name: CarParking
     ports:
       - 8080:8080
+
+volumes:
+  mongo_db: {}
