@@ -2,6 +2,7 @@ package main
 
 import (
 	"CarParking/CarParking"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -27,7 +28,13 @@ func Connection() {
 	Router.HandleFunc("/slot", CarParking.GetFreeParkingSlots).Methods("GET")
 	Router.HandleFunc("/cartoslot/{_userid}/{carnumber}/{_uniqueslotid}", CarParking.AddNewCarToSlot).Methods("PUT")
 	Router.HandleFunc("/cartoslot", CarParking.DeleteCarFromSlot).Methods("DELETE")
-	Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
+	Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { 
+		fmt.Fprintln(w, "Application Running Succefully")
+		w.WriteHeader(200) })
+	Router.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Api Calls Working")
+		w.WriteHeader(200)
+	}).Methods("GET")
 
 	http.ListenAndServe(":8080", Router)
 
